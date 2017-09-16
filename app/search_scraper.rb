@@ -3,7 +3,9 @@ require 'uri'
 require 'pry'
 require "ruby-progressbar"
 require "csv"
+require 'dotenv/load'
 
+SITE_URL = ENV['SITE_URL'].freeze
 
 class FileReader
   SRC = 'src/keywords.txt'.freeze
@@ -42,18 +44,17 @@ keywords.each.with_index(1) do |keyword, index|
   strings = html.scan(%r{<h3 class="r">(.+?)</h3>})
   length = strings.length
 
-  unless strings.flatten.join().include?('mwed.jp')
+  unless strings.flatten.join().include?(SITE_URL)
     ng << [keyword]
     next;
   end
 
   for i in 0...length do
     url, title = (strings[i][0].scan(%r{<a.+href="(.+?)".+?>(.+?)</a>}))[0]
-    if url =~ /mwed\.jp/
+    if url&.include?(SITE_URL)
       position = i + 1
       p "#{position}位：#{keyword} #{url}"
-      lines << [position, keyword, url]
-      res = true
+      lines << ["#{position}位", keyword, url]
     end
   end
 
