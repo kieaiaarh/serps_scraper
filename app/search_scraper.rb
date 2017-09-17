@@ -6,6 +6,10 @@ require "csv"
 require 'dotenv/load'
 
 SITE_URL = ENV['SITE_URL'].freeze
+USER_AGENTS = [
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Version/10.0 Mobile/14F89 Safari/602.1',
+  'Mozilla/5.0 (Linux; U; Android 4.0.1; ja-jp; Galaxy Nexus Build/ITL41D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30']
+user_agent = USER_AGENTS.sample
 
 class FileReader
   SRC = 'src/keywords.txt'.freeze
@@ -28,9 +32,10 @@ URL = 'https://www.google.co.jp/search?q='.freeze
 
 pb = ProgressBar.create(:title => "keywords_scraping", :starting_at => 0, :total => keywords.size, :output => $stderr)
 lines = []
-ng = []
+lines << [user_agent]
+p user_agent
 
-user_agent = 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; en) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3'
+ng = []
 
 keywords.each.with_index(1) do |keyword, index|
   url = URI.escape("#{URL}#{keyword}")
@@ -53,7 +58,7 @@ keywords.each.with_index(1) do |keyword, index|
     url, title = (strings[i][0].scan(%r{<a.+href="(.+?)".+?>(.+?)</a>}))[0]
     if url&.include?(SITE_URL)
       position = i + 1
-      p "#{position}位：#{keyword} #{url}"
+      p "#{position}位：#{keyword} -> #{title} #{url}"
       lines << ["#{position}位", keyword, url]
     end
   end
